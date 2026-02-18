@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { PromptConfigEditor } from "./components/PromptConfigEditor";
 import { KBPanel } from "./components/kb/KBPanel";
+import { SourcesPanel } from "./components/rag/SourcesPanel";
 import { RoomControls } from "./components/RoomControls";
 import { StatusBadge } from "./components/StatusBadge";
 import {
@@ -170,6 +171,12 @@ function App() {
               onSave={handlePromptSave}
             />
           </section>
+
+          <SourcesPanel
+            roomName={roomName}
+            connected={status === "connected"}
+            onError={setError}
+          />
         </div>
 
         <KBPanel

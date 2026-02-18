@@ -4,6 +4,7 @@ import { createAppServer } from "./http/app.js";
 import { OpenAIEmbedder } from "./rag/embed/openai.js";
 import { KbService, createVectorStore } from "./rag/kbService.js";
 import { createDefaultAgentConfigStore } from "./services/agentConfigStore.js";
+import { SessionStore } from "./session/sessionStore.js";
 
 loadEnvFile(".env");
 loadEnvFile(".env.local");
@@ -23,9 +24,10 @@ async function bootstrap(): Promise<void> {
 
   const uploadDir = path.resolve(process.cwd(), "storage", "uploads");
   const kbService = new KbService(store, embedder, uploadDir);
+  const sessionStore = new SessionStore();
 
   const agentConfigStore = createDefaultAgentConfigStore();
-  const server = createAppServer({ env, agentConfigStore, kbService });
+  const server = createAppServer({ env, agentConfigStore, kbService, sessionStore });
 
   server.listen(env.apiPort, () => {
     console.log(`Token API listening on http://localhost:${env.apiPort}`);

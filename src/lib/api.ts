@@ -137,6 +137,20 @@ export type KbSearchResult = {
   score: number;
 };
 
+export type SessionSource = {
+  docId: string;
+  docTitle: string;
+  chunkId: string;
+  snippet: string;
+};
+
+export type SessionState = {
+  roomName: string;
+  updatedAt: string;
+  sources: SessionSource[];
+  lastAnswer?: string;
+};
+
 export async function kbUpload(file: File): Promise<{ ok: true; doc: KbDoc }> {
   const formData = new FormData();
   formData.append("file", file);
@@ -234,4 +248,34 @@ export async function kbSearch(
   }
 
   return { results: body.results as KbSearchResult[] };
+}
+
+export async function fetchSessionState(roomName: string): Promise<SessionState | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/session/${encodeURIComponent(roomName)}/state`,
+    { method: "GET" },
+  );
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const message =
+      typeof body?.error === "string"
+        ? body.error
+        : `Session state fetch failed with status ${response.status}`;
+    throw new Error(message);
+  }
+
+  if (
+    typeof body?.roomName !== "string" ||
+    typeof body?.updatedAt !== "string" ||
+    !Array.isArray(body?.sources)
+  ) {
+    throw new Error("Invalid session state response from server.");
+  }
+
+  return body as SessionState;
 }
