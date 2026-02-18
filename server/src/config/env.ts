@@ -5,6 +5,9 @@ export type EnvConfig = {
   livekitUrl?: string;
   livekitApiKey?: string;
   livekitApiSecret?: string;
+  openaiApiKey?: string;
+  chromaUrl: string;
+  chromaCollection: string;
 };
 
 export function loadEnvFile(pathname: string): void {
@@ -35,6 +38,9 @@ export function getEnvConfig(env: NodeJS.ProcessEnv = process.env): EnvConfig {
     livekitUrl: env.LIVEKIT_URL,
     livekitApiKey: env.LIVEKIT_API_KEY,
     livekitApiSecret: env.LIVEKIT_API_SECRET,
+    openaiApiKey: env.OPENAI_API_KEY,
+    chromaUrl: env.CHROMA_URL ?? "http://localhost:8000",
+    chromaCollection: env.CHROMA_COLLECTION ?? "talkback_kb",
   };
 }
 

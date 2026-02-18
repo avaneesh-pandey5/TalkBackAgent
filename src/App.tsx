@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { PromptConfigEditor } from "./components/PromptConfigEditor";
+import { KBPanel } from "./components/kb/KBPanel";
 import { RoomControls } from "./components/RoomControls";
 import { StatusBadge } from "./components/StatusBadge";
 import {
@@ -134,7 +135,7 @@ function App() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 p-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">TalkBack Agent</h1>
         <StatusBadge status={status} />
@@ -142,31 +143,40 @@ function App() {
 
       <ErrorBanner message={error} />
 
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <RoomControls
-          roomName={roomName}
-          identity={identity}
-          status={status}
-          micEnabled={micEnabled}
-          onRoomNameChange={setRoomName}
-          onIdentityChange={setIdentity}
-          onConnect={handleConnect}
-          onDisconnect={handleDisconnect}
-          onMicToggle={handleMicToggle}
-        />
-      </section>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <RoomControls
+              roomName={roomName}
+              identity={identity}
+              status={status}
+              micEnabled={micEnabled}
+              onRoomNameChange={setRoomName}
+              onIdentityChange={setIdentity}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+              onMicToggle={handleMicToggle}
+            />
+          </section>
 
-      <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <PromptConfigEditor
-          value={systemPrompt}
-          updatedAt={promptUpdatedAt}
-          loading={isPromptLoading}
-          saving={isPromptSaving}
-          onChange={setSystemPrompt}
-          onReload={handlePromptReload}
-          onSave={handlePromptSave}
+          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <PromptConfigEditor
+              value={systemPrompt}
+              updatedAt={promptUpdatedAt}
+              loading={isPromptLoading}
+              saving={isPromptSaving}
+              onChange={setSystemPrompt}
+              onReload={handlePromptReload}
+              onSave={handlePromptSave}
+            />
+          </section>
+        </div>
+
+        <KBPanel
+          onError={setError}
+          onClearError={() => setError(null)}
         />
-      </section>
+      </div>
 
       <div ref={audioContainerRef} aria-hidden="true" className="hidden" />
     </main>

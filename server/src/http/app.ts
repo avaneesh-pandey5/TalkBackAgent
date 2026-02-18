@@ -1,15 +1,18 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { EnvConfig } from "../config/env.js";
+import type { KbService } from "../rag/kbService.js";
 import type { AgentConfigStore } from "../services/agentConfigStore.js";
 import { HttpError, RequestBodyTooLargeError } from "../utils/errors.js";
 import { applyCors, sendJson } from "../utils/http.js";
 import { handleAgentConfigRoute } from "./routes/agentConfig.js";
 import { handleAgentDispatchRoute } from "./routes/agentDispatch.js";
+import { handleKbRoutes } from "./routes/kb.js";
 import { handleLiveKitTokenRoute } from "./routes/livekit.js";
 
 type AppDependencies = {
   env: EnvConfig;
   agentConfigStore: AgentConfigStore;
+  kbService: KbService;
 };
 
 async function handleRequest(
@@ -34,6 +37,10 @@ async function handleRequest(
   }
 
   if (await handleAgentDispatchRoute(request, response, deps.env)) {
+    return;
+  }
+
+  if (await handleKbRoutes(request, response, deps.kbService)) {
     return;
   }
 
