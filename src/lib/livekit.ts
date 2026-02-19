@@ -8,12 +8,18 @@ import {
 
 export type RoomStatus = "disconnected" | "connecting" | "connected";
 
+export type VoiceActivity = {
+  userSpeaking: boolean;
+  agentSpeaking: boolean;
+};
+
 type ConnectOptions = {
   url: string;
   token: string;
   audioContainer?: HTMLElement | null;
   onError?: (message: string) => void;
   onStatusChange?: (status: RoomStatus) => void;
+  onVoiceActivityChange?: (activity: VoiceActivity) => void;
 };
 
 export class LiveKitRoomController {
@@ -30,11 +36,25 @@ export class LiveKitRoomController {
       await this.disconnect();
     }
 
-    const { url, token, audioContainer, onError, onStatusChange } = options;
+    const {
+      url,
+      token,
+      audioContainer,
+      onError,
+      onStatusChange,
+      onVoiceActivityChange,
+    } = options;
     onStatusChange?.("connecting");
 
     const room = new Room();
     this.audioContainer = audioContainer ?? null;
+
+    const emitVoiceActivity = (speakers: { sid: string }[]) => {
+      const localParticipantSid = room.localParticipant.sid;
+      const userSpeaking = speakers.some((speaker) => speaker.sid === localParticipantSid);
+      const agentSpeaking = speakers.some((speaker) => speaker.sid !== localParticipantSid);
+      onVoiceActivityChange?.({ userSpeaking, agentSpeaking });
+    };
 
     room.on(RoomEvent.ConnectionStateChanged, (state) => {
       if (state === ConnectionState.Connected) {
@@ -44,6 +64,10 @@ export class LiveKitRoomController {
       } else if (state === ConnectionState.Disconnected) {
         onStatusChange?.("disconnected");
       }
+    });
+
+    room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+      emitVoiceActivity(speakers);
     });
 
     room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
@@ -65,6 +89,7 @@ export class LiveKitRoomController {
 
     room.on(RoomEvent.Disconnected, () => {
       this.detachAllAudio();
+      onVoiceActivityChange?.({ userSpeaking: false, agentSpeaking: false });
       onStatusChange?.("disconnected");
     });
 
@@ -72,10 +97,12 @@ export class LiveKitRoomController {
       await room.connect(url, token);
       await room.localParticipant.setMicrophoneEnabled(true);
       this.room = room;
+      onVoiceActivityChange?.({ userSpeaking: false, agentSpeaking: false });
       onStatusChange?.("connected");
     } catch (error) {
       room.disconnect();
       this.detachAllAudio();
+      onVoiceActivityChange?.({ userSpeaking: false, agentSpeaking: false });
       onStatusChange?.("disconnected");
       onError?.(error instanceof Error ? error.message : "Failed to connect.");
       throw error;

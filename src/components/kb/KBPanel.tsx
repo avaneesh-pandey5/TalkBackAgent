@@ -102,9 +102,9 @@ export function KBPanel({ onError, onClearError }: KBPanelProps) {
   };
 
   return (
-    <section className="space-y-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="space-y-6 rounded-2xl border border-white/15 bg-black/25 p-2">
       <header className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">Knowledge Base</h2>
+        <h2 className="text-base font-semibold text-white">Knowledge Base</h2>
       </header>
 
       <KBUpload

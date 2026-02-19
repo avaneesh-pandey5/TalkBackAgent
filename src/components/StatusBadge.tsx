@@ -5,15 +5,15 @@ type StatusBadgeProps = {
 };
 
 const statusClassMap: Record<RoomStatus, string> = {
-  connected: "bg-green-100 text-green-800 border-green-200",
-  connecting: "bg-amber-100 text-amber-800 border-amber-200",
-  disconnected: "bg-slate-100 text-slate-700 border-slate-200",
+  connected: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  connecting: "border-amber-200 bg-amber-50 text-amber-800",
+  disconnected: "border-slate-200 bg-slate-100 text-slate-700",
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${statusClassMap[status]}`}
+      className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.13em] ${statusClassMap[status]}`}
     >
       {status}
     </span>

@@ -1,1 +1,223 @@
 @import "tailwindcss";
+
+:root {
+  color: #f5f7fa;
+  background-color: #070707;
+  font-family: "Sora", "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #070707;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.orb-ambient-glow {
+  position: absolute;
+  width: 740px;
+  height: 740px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.2), rgba(0, 0, 0, 0) 66%);
+  filter: blur(20px);
+  opacity: 0.55;
+}
+
+.voice-orb {
+  position: relative;
+  width: min(54vw, 520px);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 220ms ease;
+}
+
+.voice-orb__core {
+  position: relative;
+  width: 62%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(230, 251, 255, 0.95), rgba(34, 211, 238, 0.18) 35%, rgba(0, 0, 0, 0.98) 76%);
+  box-shadow:
+    inset 0 0 80px rgba(34, 211, 238, 0.13),
+    0 0 90px rgba(34, 211, 238, 0.14);
+}
+
+.voice-orb__ring {
+  position: absolute;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  inset: 8%;
+  opacity: 0.4;
+}
+
+.voice-orb__ring--two {
+  inset: 0%;
+  opacity: 0.24;
+}
+
+.orb--disconnected .voice-orb__core {
+  filter: saturate(0.35);
+  opacity: 0.5;
+  box-shadow: inset 0 0 40px rgba(148, 163, 184, 0.13);
+}
+
+.orb--connecting .voice-orb__ring--one {
+  animation: orb-spin 2.5s linear infinite;
+}
+
+.orb--connecting .voice-orb__ring--two {
+  animation: orb-spin 3.8s linear infinite reverse;
+}
+
+.orb--idle .voice-orb__core {
+  animation: orb-breathe 4s ease-in-out infinite;
+}
+
+.orb--user .voice-orb__ring--one,
+.orb--agent .voice-orb__ring--one {
+  animation: orb-pulse 1.2s ease-in-out infinite;
+}
+
+.orb--agent .voice-orb__core {
+  animation: orb-agent 0.9s ease-in-out infinite;
+}
+
+.orb--thinking .voice-orb__ring--one {
+  animation: orb-thinking 1.1s ease-in-out infinite;
+}
+
+.orb-control {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(var(--orb-angle))
+    translateY(calc(-1 * var(--orb-distance))) rotate(calc(-1 * var(--orb-angle)));
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  color: #e5ecf3;
+  padding: 0.56rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition: 170ms ease;
+}
+
+.orb-control:hover:not(:disabled) {
+  border-color: rgba(34, 211, 238, 0.55);
+  color: #d6f8ff;
+  background: rgba(34, 211, 238, 0.11);
+  transform: translate(-50%, -50%) rotate(var(--orb-angle))
+    translateY(calc(-1 * var(--orb-distance))) rotate(calc(-1 * var(--orb-angle)))
+    scale(1.03);
+}
+
+.orb-control:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.orb-control__icon {
+  font-size: 0.92rem;
+}
+
+.orb-control-mobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8edf3;
+  padding: 0.48rem 0.72rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.orb-control-mobile:disabled {
+  opacity: 0.45;
+}
+
+@keyframes orb-breathe {
+  0%, 100% {
+    transform: scale(0.98);
+    box-shadow:
+      inset 0 0 80px rgba(34, 211, 238, 0.13),
+      0 0 90px rgba(34, 211, 238, 0.12);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow:
+      inset 0 0 95px rgba(34, 211, 238, 0.2),
+      0 0 120px rgba(34, 211, 238, 0.2);
+  }
+}
+
+@keyframes orb-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.74;
+  }
+}
+
+@keyframes orb-agent {
+  0%, 100% {
+    transform: scale(0.96);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes orb-thinking {
+  0%, 100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.66;
+  }
+}
+
+@keyframes orb-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .voice-orb {
+    width: min(82vw, 410px);
+  }
+
+  .orb-ambient-glow {
+    width: 540px;
+    height: 540px;
+    opacity: 0.45;
+  }
+
+  .orb-control__label {
+    display: none;
+  }
+}

@@ -13,12 +13,12 @@ export function KBUpload({
 }: KBUploadProps) {
   return (
     <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-slate-800">Upload</h3>
+      <h3 className="text-sm font-semibold text-slate-100">Upload</h3>
 
       <input
         type="file"
         accept=".pdf,.txt,application/pdf,text/plain"
-        className="block w-full cursor-pointer rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+        className="block w-full cursor-pointer rounded-xl border border-white/20 bg-black/35 px-3 py-2 text-sm text-slate-100 outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-200 hover:file:bg-white/20"
         onChange={(event) => {
           const file = event.target.files?.[0] ?? null;
           onFileChange(file);
@@ -26,15 +26,15 @@ export function KBUpload({
         disabled={uploading}
       />
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-xl border border-cyan-400/35 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/55 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-60"
           onClick={onUpload}
           disabled={uploading || !selectedFileName}
         >
           {uploading ? "Uploading..." : "Upload File"}
         </button>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-slate-400">
           {selectedFileName || "No file selected"}
         </span>
       </div>

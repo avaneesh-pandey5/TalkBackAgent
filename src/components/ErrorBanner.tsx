@@ -7,7 +7,7 @@ export function ErrorBanner({ message }: ErrorBannerProps) {
 
   return (
     <div
-      className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      className="rounded-2xl border border-rose-400/35 bg-rose-500/12 px-4 py-3 text-sm text-rose-100 shadow-[0_10px_40px_rgba(127,29,29,0.35)]"
       role="alert"
       aria-live="polite"
     >

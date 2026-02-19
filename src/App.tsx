@@ -1,17 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { PromptConfigEditor } from "./components/PromptConfigEditor";
+import { OverlayPanel } from "./components/layout/OverlayPanel";
 import { KBPanel } from "./components/kb/KBPanel";
 import { SourcesPanel } from "./components/rag/SourcesPanel";
-import { RoomControls } from "./components/RoomControls";
-import { StatusBadge } from "./components/StatusBadge";
+import { OrbStage } from "./components/voice/OrbStage";
 import {
   dispatchAgent,
   fetchAgentConfig,
   fetchLiveKitToken,
   updateAgentConfig,
 } from "./lib/api";
-import { LiveKitRoomController, type RoomStatus } from "./lib/livekit";
+import {
+  LiveKitRoomController,
+  type RoomStatus,
+  type VoiceActivity,
+} from "./lib/livekit";
 
 function App() {
   const [roomName, setRoomName] = useState("agent-room");
@@ -19,6 +23,15 @@ function App() {
   const [status, setStatus] = useState<RoomStatus>("disconnected");
   const [error, setError] = useState<string | null>(null);
   const [micEnabled, setMicEnabled] = useState(true);
+  const [voiceActivity, setVoiceActivity] = useState<VoiceActivity>({
+    userSpeaking: false,
+    agentSpeaking: false,
+  });
+  const [thinking, setThinking] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [showKb, setShowKb] = useState(false);
+  const [showSources, setShowSources] = useState(false);
+  const [showRoomConfig, setShowRoomConfig] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState("");
   const [promptUpdatedAt, setPromptUpdatedAt] = useState<string | null>(null);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
@@ -45,6 +58,26 @@ function App() {
 
     void loadPromptConfig();
   }, []);
+
+  useEffect(() => {
+    if (status !== "connected") {
+      setThinking(false);
+      return;
+    }
+    if (voiceActivity.agentSpeaking || voiceActivity.userSpeaking) {
+      setThinking(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setThinking(false);
+    }, 2200);
+    setThinking(true);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [status, voiceActivity.agentSpeaking, voiceActivity.userSpeaking]);
 
   useEffect(() => {
     return () => {
@@ -77,12 +110,14 @@ function App() {
         audioContainer: audioContainerRef.current,
         onStatusChange: setStatus,
         onError: setError,
+        onVoiceActivityChange: setVoiceActivity,
       });
 
       setMicEnabled(true);
     } catch {
-      // Errors are already surfaced through onError callback.
       setStatus("disconnected");
+      setVoiceActivity({ userSpeaking: false, agentSpeaking: false });
+      setThinking(false);
     }
   };
 
@@ -90,6 +125,8 @@ function App() {
     await roomController.disconnect();
     setStatus("disconnected");
     setMicEnabled(false);
+    setVoiceActivity({ userSpeaking: false, agentSpeaking: false });
+    setThinking(false);
   };
 
   const handleMicToggle = async () => {
@@ -136,54 +173,128 @@ function App() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 p-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">TalkBack Agent</h1>
-        <StatusBadge status={status} />
-      </header>
+    <main className="relative min-h-screen bg-[#070707]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(7,116,140,0.16),rgba(0,0,0,0)_42%),radial-gradient(circle_at_20%_15%,rgba(14,165,233,0.11),rgba(0,0,0,0)_35%)]" />
+      <div className="relative z-10">
+        <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
+          <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Voice Workspace</p>
+          <p className="rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-cyan-100">
+            {status}
+          </p>
+        </header>
 
-      <ErrorBanner message={error} />
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-6">
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <RoomControls
-              roomName={roomName}
-              identity={identity}
-              status={status}
-              micEnabled={micEnabled}
-              onRoomNameChange={setRoomName}
-              onIdentityChange={setIdentity}
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-              onMicToggle={handleMicToggle}
-            />
-          </section>
-
-          <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <PromptConfigEditor
-              value={systemPrompt}
-              updatedAt={promptUpdatedAt}
-              loading={isPromptLoading}
-              saving={isPromptSaving}
-              onChange={setSystemPrompt}
-              onReload={handlePromptReload}
-              onSave={handlePromptSave}
-            />
-          </section>
-
-          <SourcesPanel
-            roomName={roomName}
-            connected={status === "connected"}
-            onError={setError}
-          />
+        <div className="mx-auto w-full max-w-6xl px-3 pb-6 sm:px-6">
+          <ErrorBanner message={error} />
         </div>
 
+        <OrbStage
+          status={status}
+          userSpeaking={voiceActivity.userSpeaking}
+          agentSpeaking={voiceActivity.agentSpeaking}
+          thinking={thinking}
+          micEnabled={micEnabled}
+          onConnectDisconnect={() => {
+            if (status === "connected") {
+              void handleDisconnect();
+            } else if (status !== "connecting") {
+              void handleConnect();
+            }
+          }}
+          onMicToggle={() => {
+            void handleMicToggle();
+          }}
+          onPromptOpen={() => setShowPrompt(true)}
+          onKbOpen={() => setShowKb(true)}
+          onSourcesOpen={() => setShowSources(true)}
+          onRoomOpen={() => setShowRoomConfig(true)}
+        />
+      </div>
+
+      <OverlayPanel
+        open={showPrompt}
+        title="Agent Prompt"
+        subtitle="Edit instructions used by the voice agent."
+        onClose={() => setShowPrompt(false)}
+      >
+        <PromptConfigEditor
+          value={systemPrompt}
+          updatedAt={promptUpdatedAt}
+          loading={isPromptLoading}
+          saving={isPromptSaving}
+          onChange={setSystemPrompt}
+          onReload={handlePromptReload}
+          onSave={handlePromptSave}
+        />
+      </OverlayPanel>
+
+      <OverlayPanel
+        open={showKb}
+        title="Knowledge Base"
+        subtitle="Upload files, manage documents, and run retrieval searches."
+        onClose={() => setShowKb(false)}
+      >
         <KBPanel
           onError={setError}
           onClearError={() => setError(null)}
         />
-      </div>
+      </OverlayPanel>
+
+      <OverlayPanel
+        open={showSources}
+        title="RAG Sources Used"
+        subtitle={`Room: ${roomName}`}
+        onClose={() => setShowSources(false)}
+      >
+        <SourcesPanel
+          roomName={roomName}
+          connected={status === "connected"}
+          onError={setError}
+        />
+      </OverlayPanel>
+
+      <OverlayPanel
+        open={showRoomConfig}
+        title="Room & Identity"
+        subtitle="Update connection details used for dispatch and join."
+        onClose={() => setShowRoomConfig(false)}
+      >
+        <div className="space-y-4">
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+            Room Name
+            <input
+              className="rounded-xl border border-white/20 bg-black/30 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-300/20"
+              value={roomName}
+              onChange={(event) => setRoomName(event.target.value)}
+              disabled={status === "connecting" || status === "connected"}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-200">
+            Identity
+            <input
+              className="rounded-xl border border-white/20 bg-black/30 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-300/20"
+              value={identity}
+              onChange={(event) => setIdentity(event.target.value)}
+              disabled={status === "connecting" || status === "connected"}
+            />
+          </label>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              className="rounded-xl border border-cyan-400/35 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300/55 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => {
+                if (status === "connected") {
+                  void handleDisconnect();
+                } else if (status !== "connecting") {
+                  void handleConnect();
+                }
+              }}
+              disabled={status === "connecting"}
+            >
+              {status === "connected" ? "Disconnect" : status === "connecting" ? "Connecting..." : "Connect"}
+            </button>
+          </div>
+        </div>
+      </OverlayPanel>
 
       <div ref={audioContainerRef} aria-hidden="true" className="hidden" />
     </main>

@@ -56,30 +56,30 @@ export function SourcesPanel({ roomName, connected, onError }: SourcesPanelProps
   }, [connected, roomName, onError]);
 
   return (
-    <section className="space-y-3 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <header className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">RAG Sources Used</h2>
-        <span className="text-xs text-slate-500">
-          {updatedAt ? `Updated: ${new Date(updatedAt).toLocaleTimeString()}` : "No data"}
+    <section className="space-y-3 rounded-2xl border border-white/15 bg-black/25 p-2">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-white">RAG Sources Used</h2>
+        <span className="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-slate-300">
+          {updatedAt ? `Updated ${new Date(updatedAt).toLocaleTimeString()}` : "No data"}
         </span>
       </header>
 
       {!connected ? (
-        <p className="text-sm text-slate-500">Connect to a room to see sources.</p>
+        <p className="text-sm text-slate-400">Connect to a room to see sources.</p>
       ) : null}
 
-      {connected && loading ? <p className="text-sm text-slate-500">Loading sources...</p> : null}
+      {connected && loading ? <p className="text-sm text-slate-400">Loading sources...</p> : null}
 
       {connected && !loading && sources.length === 0 ? (
-        <p className="text-sm text-slate-500">No sources were used yet.</p>
+        <p className="text-sm text-slate-400">No sources were used yet.</p>
       ) : null}
 
       {connected && sources.length > 0 ? (
         <ul className="space-y-3">
           {sources.map((source) => (
-            <li key={source.chunkId} className="rounded-md border border-slate-200 p-3">
-              <p className="text-sm font-semibold text-slate-800">{source.docTitle}</p>
-              <p className="mt-1 text-sm text-slate-600">{source.snippet}</p>
+            <li key={source.chunkId} className="rounded-xl border border-white/15 bg-black/35 p-3">
+              <p className="text-sm font-semibold text-slate-100">{source.docTitle}</p>
+              <p className="mt-1 text-sm text-slate-300">{source.snippet}</p>
             </li>
           ))}
         </ul>
