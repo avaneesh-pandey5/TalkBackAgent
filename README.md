@@ -1,6 +1,7 @@
 # TalkBackAgent
 
 Voice assistant app built with:
+
 - React frontend (`/`)
 - Node API server (`/server`)
 - LiveKit Agents worker (`/server/src/agent`)
@@ -20,6 +21,7 @@ npm install
 ```
 
 2. Create environment files.
+
 - Root: `.env`
 - Server: `server/.env.local` (preferred for secrets)
 
@@ -61,6 +63,7 @@ OPENAI_API_KEY=...
 ```
 
 Notes:
+
 - `OPENAI_API_KEY` is required by this codebase for KB embeddings.
 - The agent currently uses `deepgram/nova-3:multi` (STT), `openai/gpt-4.1-mini` (LLM), and `cartesia/sonic-3:...` (TTS).
 
@@ -77,24 +80,28 @@ VITE_API_BASE_URL=http://localhost:8787
 Use three terminals.
 
 Terminal 1: API server
+
 ```bash
 cd server
 npm run dev:api
 ```
 
 Terminal 2: LiveKit agent worker
+
 ```bash
 cd server
 npm run dev:agent
 ```
 
 If first worker run in this repo:
+
 ```bash
 cd server
 npm run download-files
 ```
 
 Terminal 3: frontend
+
 ```bash
 cd .
 npm run dev
@@ -113,6 +120,7 @@ livekit-server --dev
 ```
 
 Defaults in dev mode:
+
 - API key: `devkey`
 - API secret: `secret`
 - URL: `ws://localhost:7880`
@@ -146,12 +154,9 @@ LIVEKIT_API_SECRET=<cloud-api-secret>
   - Uploaded files are written to disk and vectors may be persisted in Chroma.
   - Document list metadata (`/kb/docs`) is in-memory and is not rebuilt on restart.
 - Retrieval still blocks LLM start:
-  - Session-state writes before LLM are now non-blocking.
   - KB search still runs before LLM generation, so retrieval latency affects first token.
 - Preemptive generation tradeoff:
   - Enabled to reduce perceived delay.
   - Can occasionally increase partial/aborted starts if user speech changes near turn boundaries.
-- No auth layer on API routes:
-  - CORS is open (`*`) and routes are unauthenticated; suitable for local dev, not production as-is.
 - Limited observability:
   - No full latency metrics pipeline yet (STT/EOU/LLM/TTS p50/p95 not emitted).
