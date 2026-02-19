@@ -60,7 +60,7 @@ export class Agent extends voice.Agent {
     const query = getLastUserQuery(chatCtx);
     const sources = query ? await this.kbSearchClient.search(query, 4) : [];
 
-    await this.sessionStateClient.updateRoomState(this.roomName, {
+    void this.sessionStateClient.updateRoomState(this.roomName, {
       sources,
     });
 
