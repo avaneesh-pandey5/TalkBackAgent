@@ -153,6 +153,42 @@ body {
   opacity: 0.45;
 }
 
+.transcript-chip {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(2, 6, 23, 0.66);
+  backdrop-filter: blur(10px);
+  padding: 0.7rem 0.9rem;
+  color: #dce8f6;
+  line-height: 1.35;
+}
+
+.transcript-chip--interim {
+  opacity: 0.9;
+}
+
+.transcript-chip--final {
+  border-color: rgba(34, 211, 238, 0.38);
+  opacity: 1;
+}
+
+.transcript-chip__label {
+  flex: 0 0 auto;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: #8dc8d7;
+  font-weight: 700;
+}
+
+.transcript-chip__text {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
 @keyframes orb-breathe {
   0%, 100% {
     transform: scale(0.98);
@@ -219,5 +255,13 @@ body {
 
   .orb-control__label {
     display: none;
+  }
+
+  .transcript-chip {
+    padding: 0.62rem 0.75rem;
+  }
+
+  .transcript-chip__text {
+    font-size: 0.8rem;
   }
 }

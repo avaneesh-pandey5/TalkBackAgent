@@ -7,6 +7,10 @@ type OrbStageProps = {
   agentSpeaking: boolean;
   thinking: boolean;
   micEnabled: boolean;
+  userTranscript: string;
+  userTranscriptFinal: boolean;
+  agentTranscript: string;
+  agentTranscriptFinal: boolean;
   onConnectDisconnect: () => void;
   onMicToggle: () => void;
   onPromptOpen: () => void;
@@ -45,6 +49,10 @@ export function OrbStage({
   agentSpeaking,
   thinking,
   micEnabled,
+  userTranscript,
+  userTranscriptFinal,
+  agentTranscript,
+  agentTranscriptFinal,
   onConnectDisconnect,
   onMicToggle,
   onPromptOpen,
@@ -54,7 +62,12 @@ export function OrbStage({
 }: OrbStageProps) {
   const isConnected = status === "connected";
   const isConnecting = status === "connecting";
-  const stateLabel = getOrbStateLabel(status, userSpeaking, agentSpeaking, thinking);
+  const stateLabel = getOrbStateLabel(
+    status,
+    userSpeaking,
+    agentSpeaking,
+    thinking,
+  );
   const orbModeClass =
     status === "disconnected"
       ? "orb--disconnected"
@@ -71,7 +84,11 @@ export function OrbStage({
   const controls: ControlButton[] = [
     {
       key: "connect",
-      label: isConnected ? "Disconnect" : isConnecting ? "Connecting..." : "Connect",
+      label: isConnected
+        ? "Disconnect"
+        : isConnecting
+          ? "Connecting..."
+          : "Connect",
       icon: isConnected ? "⏹" : "▶",
       onClick: onConnectDisconnect,
       disabled: isConnecting,
@@ -137,6 +154,28 @@ export function OrbStage({
         <p className="mt-3 text-sm uppercase tracking-[0.2em] text-slate-300 sm:text-base">
           {stateLabel}
         </p>
+      </div>
+
+      <div className="absolute bottom-[1.2rem] left-4 z-20 w-[min(32vw,22rem)] max-w-[calc(100vw-2rem)] sm:left-6">
+        <div
+          className={`transcript-chip ${agentTranscriptFinal ? "transcript-chip--final" : "transcript-chip--interim"}`}
+        >
+          <span className="transcript-chip__label">Agent</span>
+          <span className="transcript-chip__text">
+            {agentTranscript || "Waiting for agent speech..."}
+          </span>
+        </div>
+      </div>
+
+      <div className="absolute bottom-[1.2rem] right-4 z-20 w-[min(32vw,22rem)] max-w-[calc(100vw-2rem)] sm:right-6">
+        <div
+          className={`transcript-chip ${userTranscriptFinal ? "transcript-chip--final" : "transcript-chip--interim"}`}
+        >
+          <span className="transcript-chip__label">You</span>
+          <span className="transcript-chip__text">
+            {userTranscript || "Start speaking to see live transcript..."}
+          </span>
+        </div>
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-30 hidden sm:block">

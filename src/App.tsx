@@ -12,6 +12,7 @@ import {
   updateAgentConfig,
 } from "./lib/api";
 import {
+  type LiveTranscripts,
   LiveKitRoomController,
   type RoomStatus,
   type VoiceActivity,
@@ -26,6 +27,10 @@ function App() {
   const [voiceActivity, setVoiceActivity] = useState<VoiceActivity>({
     userSpeaking: false,
     agentSpeaking: false,
+  });
+  const [transcripts, setTranscripts] = useState<LiveTranscripts>({
+    user: { text: "", isFinal: false },
+    agent: { text: "", isFinal: false },
   });
   const [thinking, setThinking] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -111,12 +116,17 @@ function App() {
         onStatusChange: setStatus,
         onError: setError,
         onVoiceActivityChange: setVoiceActivity,
+        onTranscriptsChange: setTranscripts,
       });
 
       setMicEnabled(true);
     } catch {
       setStatus("disconnected");
       setVoiceActivity({ userSpeaking: false, agentSpeaking: false });
+      setTranscripts({
+        user: { text: "", isFinal: false },
+        agent: { text: "", isFinal: false },
+      });
       setThinking(false);
     }
   };
@@ -126,6 +136,10 @@ function App() {
     setStatus("disconnected");
     setMicEnabled(false);
     setVoiceActivity({ userSpeaking: false, agentSpeaking: false });
+    setTranscripts({
+      user: { text: "", isFinal: false },
+      agent: { text: "", isFinal: false },
+    });
     setThinking(false);
   };
 
@@ -193,6 +207,10 @@ function App() {
           agentSpeaking={voiceActivity.agentSpeaking}
           thinking={thinking}
           micEnabled={micEnabled}
+          userTranscript={transcripts.user.text}
+          userTranscriptFinal={transcripts.user.isFinal}
+          agentTranscript={transcripts.agent.text}
+          agentTranscriptFinal={transcripts.agent.isFinal}
           onConnectDisconnect={() => {
             if (status === "connected") {
               void handleDisconnect();
